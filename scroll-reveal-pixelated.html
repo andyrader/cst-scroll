@@ -33,6 +33,7 @@
     background-image: url('about-1.png');
     background-size: cover;
     background-position: center;
+    background-color: #1a1a2e;
   }
 
   #revealCanvas {
@@ -40,7 +41,6 @@
     inset: 0;
     width: 100%;
     height: 100%;
-    image-rendering: pixelated;
   }
 
   .scroll-content {
@@ -65,8 +65,8 @@
     color: #1C1D1E;
     padding: 0 2rem 10vh;
     width: 100%;
-    font-family: sans-serif;
-    font-weight: bold;
+   font-family: sans-serif;
+   font-weight: bold;
   }
 
   .end-spacer { height: 150vh; }
@@ -114,91 +114,94 @@
   const s1 = document.getElementById('s1');
   const s2 = document.getElementById('s2');
 
-  // Low-res pixel grid size — bigger = chunkier pixels
-  const PIXEL = 1;
-  let W, H, cx, cy, PW, PH, animTime = 0;
+  let W, H, cx, cy, animTime = 0;
   let prog1 = 0, prog2 = 0;
 
   const img1 = new Image(); img1.src = 'about-2.png';
   const img2 = new Image(); img2.src = 'about-3.png';
 
+  // Offscreen canvas for the noise mask
+  const maskCanvas = document.createElement('canvas');
+  const mCtx = maskCanvas.getContext('2d');
+
   function resize() {
     const stage = canvas.parentElement;
-    W = stage.offsetWidth;
-    H = stage.offsetHeight;
-    // Draw at low res, CSS stretches it (pixelated rendering)
-    PW = Math.ceil(W / PIXEL);
-    PH = Math.ceil(H / PIXEL);
-    canvas.width  = PW;
-    canvas.height = PH;
-    cx = PW / 2;
-    cy = PH / 2;
+    W = canvas.width = maskCanvas.width = stage.offsetWidth;
+    H = canvas.height = maskCanvas.height = stage.offsetHeight;
+    cx = W / 2;
+    cy = H / 2;
   }
 
-  // Simple hash noise — deterministic per pixel + time bucket
-  function hashNoise(x, y, t) {
-    const tx = Math.floor(t);
-    const n = Math.sin(x * 127.1 + y * 311.7 + tx * 74.3) * 43758.5453;
+  function hashNoise(x, y, seed) {
+    const n = Math.sin(x * 127.1 + y * 311.7 + seed * 74.3) * 43758.5453;
     return n - Math.floor(n);
   }
 
-  function drawPixelBlob(prog, t, colors, seed) {
-    if (prog <= 0) return;
-
+  // Build a mask on the offscreen canvas using pixel noise at the edge
+  function buildNoiseMask(prog, seed) {
     const maxR = Math.sqrt(cx * cx + cy * cy) * 1.05;
     const baseR = prog * maxR;
-    // Edge noise band width (in pixel-grid units)
-    const band = 20 + prog * 30;
+    const band  = 20 + prog * 30;
+    const inner = baseR - band;
+    const outer = baseR + band;
 
-    // Make a color gradient function across the canvas
-    const [c0, c1, c2] = colors.map(hexToRgb);
+    const imageData = mCtx.createImageData(W, H);
+    const d = imageData.data;
 
-    for (let py = 0; py < PH; py++) {
-      for (let px = 0; px < PW; px++) {
+    for (let py = 0; py < H; py++) {
+      for (let px = 0; px < W; px++) {
         const dx = px - cx, dy = py - cy;
         const dist = Math.sqrt(dx * dx + dy * dy);
-
-        // In the edge band, use noise to decide filled or not
-        const inner = baseR - band;
-        const outer = baseR + band;
 
         let filled = false;
         if (dist < inner) {
           filled = true;
         } else if (dist < outer) {
-          const n = hashNoise(px + seed, py + seed * 1.3, 0);
-          const threshold = (dist - inner) / (outer - inner);
-          filled = n > threshold;
+          const n = hashNoise(px + seed * 13, py + seed * 7, seed);
+          filled = n > (dist - inner) / (outer - inner);
         }
 
         if (filled) {
-          // Gradient colour based on position
-          const gx = px / PW, gy = py / PH;
-          const mix = gx * 0.5 + gy * 0.5;
-          const [r, g, b] = lerpColor(mix < 0.5
-            ? [c0, c1, mix * 2]
-            : [c1, c2, (mix - 0.5) * 2]);
-
-          // Zoom: sample from slightly inward
-          const scale = 1.15 - prog * 0.15;
-          const sx = Math.round(cx + (px - cx) / scale);
-          const sy = Math.round(cy + (py - cy) / scale);
-          const [fr, fg, fb] = (sx >= 0 && sx < PW && sy >= 0 && sy < PH)
-            ? lerpColor([c0, c2, (sx / PW * 0.5 + sy / PH * 0.5)])
-            : [r, g, b];
-
-          ctx.fillStyle = `rgb(${fr},${fg},${fb})`;
-          ctx.fillRect(px, py, 1, 1);
+          const i = (py * W + px) * 4;
+          d[i] = d[i+1] = d[i+2] = 255;
+          d[i+3] = 255;
         }
       }
     }
+    mCtx.putImageData(imageData, 0, 0);
+  }
+
+  function drawBlob(prog, img, seed) {
+    if (prog <= 0 || !img.complete || !img.naturalWidth) return;
+
+    // Build the noise mask for this frame
+    buildNoiseMask(prog, seed);
+
+    ctx.save();
+
+    // Use the mask canvas as a clipping mask via compositing
+    // Draw mask first as destination
+    ctx.drawImage(maskCanvas, 0, 0);
+
+    // Switch to source-in: only draw where mask is opaque
+    ctx.globalCompositeOperation = 'source-in';
+
+    // Draw image with zoom
+    const scale = 1.15 - prog * 0.15;
+    ctx.translate(cx, cy);
+    ctx.scale(scale, scale);
+    ctx.translate(-cx, -cy);
+    ctx.drawImage(img, 0, 0, W, H);
+
+    ctx.restore();
+    // Reset composite mode
+    ctx.globalCompositeOperation = 'source-over';
   }
 
   function render() {
-    animTime += 0.18;
-    ctx.clearRect(0, 0, PW, PH);
-    drawPixelBlob(prog1, animTime,      COLORS[0], 0);
-    drawPixelBlob(prog2, animTime + 50, COLORS[1], 99);
+    ctx.clearRect(0, 0, W, H);
+    drawBlob(prog1, img1, 0);
+    drawBlob(prog2, img2, 99);
     requestAnimationFrame(render);
   }
 
