@@ -31,15 +31,9 @@
   .layer-base {
     position: absolute;
     inset: 0;
-    background: url(about-1.png) no-repeat 50% 50%;
+    background-image: url('about-1.png');
     background-size: cover;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: rgba(255,255,255,0.2);
-    font-size: 1.1rem;
-    letter-spacing: 0.2em;
-    text-transform: uppercase;
+    background-position: center;
   }
 
   #revealCanvas {
@@ -70,11 +64,13 @@
   .sentence {
     max-width: 460px;
     text-align: center;
-    font-size: clamp(1rem, 2.5vw, 1.4rem);
+    font-size: clamp(2rem, 2.5vw, 4.5rem);
     line-height: 1.7;
     color: #222;
     padding: 0 2rem 10vh;
     width: 100%;
+   font-family: sans-serif;
+   font-weight: bold;
   }
 
   /* Extra scroll room at the end */
@@ -100,7 +96,7 @@
   <!-- Sticky circle, always centered -->
   <div class="scene">
     <div class="circle-stage">
-      <div class="layer-base">Image One</div>
+      <div class="layer-base"></div>
       <canvas id="revealCanvas"></canvas>
     </div>
   </div>
@@ -109,11 +105,11 @@
   <div class="scroll-content">
     <!-- Block 1: sentence 1 at bottom, drives reveal 1 as it scrolls up -->
     <div class="block">
-      <p class="sentence" id="s1">This is the first sentence. It scrolls naturally beneath the circle and drives the first reveal.</p>
+      <p class="sentence" id="s1">Doing good science is important.</p>
     </div>
     <!-- Block 2: sentence 2 at bottom, drives reveal 2 as it scrolls up -->
     <div class="block">
-      <p class="sentence" id="s2">This is the second sentence. As it rises, the second image grows into view.</p>
+      <p class="sentence" id="s2"> So is just doing good.</p>
     </div>
     <div class="end-spacer"></div>
   </div>
@@ -130,10 +126,8 @@
   let W, H, cx, cy, animTime = 0;
   let prog1 = 0, prog2 = 0;
 
-  const COLORS = [
-    ['#f5af19', '#f12711', '#c0392b'],
-    ['#43cea2', '#185a9d', '#6a3093'],
-  ];
+  const img1 = new Image(); img1.src = 'about-2.png';
+  const img2 = new Image(); img2.src = 'about-3.png';
 
   function resize() {
     const stage = canvas.parentElement;
@@ -153,7 +147,7 @@
     );
   }
 
-  function drawBlob(prog, t, colors, seed) {
+  function drawBlob(prog, t, img, seed) {
     if (prog <= 0) return;
     const maxR = Math.sqrt(cx * cx + cy * cy) * 1.05;
     const baseR = prog * maxR;
@@ -176,20 +170,15 @@
     ctx.scale(scale, scale);
     ctx.translate(-cx, -cy);
 
-    const grad = ctx.createLinearGradient(0, 0, W, H);
-    grad.addColorStop(0,   colors[0]);
-    grad.addColorStop(0.5, colors[1]);
-    grad.addColorStop(1,   colors[2]);
-    ctx.fillStyle = grad;
-    ctx.fillRect(0, 0, W, H);
+    ctx.drawImage(img, 0, 0, W, H);
     ctx.restore();
   }
 
   function render() {
     animTime += 0.018;
     ctx.clearRect(0, 0, W, H);
-    drawBlob(prog1, animTime,       COLORS[0], 0);
-    drawBlob(prog2, animTime + 100, COLORS[1], 99);
+    drawBlob(prog1, animTime,       img1, 0);
+    drawBlob(prog2, animTime + 100, img2, 99);
     requestAnimationFrame(render);
   }
 
