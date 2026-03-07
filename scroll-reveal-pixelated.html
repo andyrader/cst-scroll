@@ -97,10 +97,10 @@
 
   <div class="scroll-content">
     <div class="block">
-      <p class="sentence" id="s1">This is the first sentence. It scrolls naturally beneath the circle and drives the first reveal.</p>
+      <p class="sentence" id="s1">Doing good science is important.</p>
     </div>
     <div class="block">
-      <p class="sentence" id="s2">This is the second sentence. As it rises, the second image grows into view.</p>
+      <p class="sentence" id="s2">So is just doing good.</p>
     </div>
     <div class="end-spacer"></div>
   </div>
@@ -120,14 +120,16 @@
   const img1 = new Image(); img1.src = 'about-2.png';
   const img2 = new Image(); img2.src = 'about-3.png';
 
-  // Offscreen canvas for the noise mask
+  // Offscreen canvases — one mask, one per blob
   const maskCanvas = document.createElement('canvas');
   const mCtx = maskCanvas.getContext('2d');
+  const blobCanvas = document.createElement('canvas');
+  const bCtx = blobCanvas.getContext('2d');
 
   function resize() {
     const stage = canvas.parentElement;
-    W = canvas.width = maskCanvas.width = stage.offsetWidth;
-    H = canvas.height = maskCanvas.height = stage.offsetHeight;
+    W = canvas.width = maskCanvas.width = blobCanvas.width = stage.offsetWidth;
+    H = canvas.height = maskCanvas.height = blobCanvas.height = stage.offsetHeight;
     cx = W / 2;
     cy = H / 2;
   }
@@ -174,28 +176,26 @@
   function drawBlob(prog, img, seed) {
     if (prog <= 0 || !img.complete || !img.naturalWidth) return;
 
-    // Build the noise mask for this frame
+    // 1. Build noise mask on maskCanvas
     buildNoiseMask(prog, seed);
 
-    ctx.save();
-
-    // Use the mask canvas as a clipping mask via compositing
-    // Draw mask first as destination
-    ctx.drawImage(maskCanvas, 0, 0);
-
-    // Switch to source-in: only draw where mask is opaque
-    ctx.globalCompositeOperation = 'source-in';
-
-    // Draw image with zoom
+    // 2. Draw image (with zoom) onto blobCanvas
+    bCtx.clearRect(0, 0, W, H);
+    bCtx.save();
     const scale = 1.15 - prog * 0.15;
-    ctx.translate(cx, cy);
-    ctx.scale(scale, scale);
-    ctx.translate(-cx, -cy);
-    ctx.drawImage(img, 0, 0, W, H);
+    bCtx.translate(cx, cy);
+    bCtx.scale(scale, scale);
+    bCtx.translate(-cx, -cy);
+    bCtx.drawImage(img, 0, 0, W, H);
+    bCtx.restore();
 
-    ctx.restore();
-    // Reset composite mode
-    ctx.globalCompositeOperation = 'source-over';
+    // 3. Clip blobCanvas to the mask using destination-in
+    bCtx.globalCompositeOperation = 'destination-in';
+    bCtx.drawImage(maskCanvas, 0, 0);
+    bCtx.globalCompositeOperation = 'source-over';
+
+    // 4. Draw clipped blob onto main canvas
+    ctx.drawImage(blobCanvas, 0, 0);
   }
 
   function render() {
