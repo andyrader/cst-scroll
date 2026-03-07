@@ -11,7 +11,7 @@
   /* ── Hero: sticky circle lives here ── */
   .hero {
     position: relative;
-    height: 500vh;
+    height: 300vh;
   }
 
   .scene {
@@ -41,7 +41,6 @@
     height: min(55vw, 55vh);
     border-radius: 50%;
     overflow: hidden;
-    box-shadow: 0 8px 48px rgba(0,0,0,0.13);
   }
 
   .layer-base {
@@ -86,13 +85,15 @@
   }
 
   .sentence {
-    max-width: 460px;
     text-align: center;
-    font-size: clamp(1rem, 2.5vw, 1.4rem);
-    line-height: 1.7;
-    color: #222;
+    font-size: clamp(2rem, 72px, 4.5rem);
+    letter-spacing: -0.025em;
+    line-height: 1;
+    color: #1C1D1E;
     padding: 0 2rem 10vh;
     width: 100%;
+   font-family: sans-serif;
+   font-weight: bold;
   }
 
   /* ── Next section ── */
@@ -103,7 +104,6 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    background: #fff;
   }
 
   .label {
@@ -132,12 +132,11 @@
     </div>
 
     <div class="scroll-content">
-      <div class="sentences-spacer"></div>
       <div class="block">
-        <p class="sentence" id="s1">This is the first sentence. It scrolls naturally beneath the circle and drives the first reveal.</p>
+        <p class="sentence" id="s1">Doing good science is important.</p>
       </div>
       <div class="block">
-        <p class="sentence" id="s2">This is the second sentence. As it rises, the second image grows into view.</p>
+        <p class="sentence" id="s2">So is just doing good.</p>
       </div>
     </div>
   </div>
