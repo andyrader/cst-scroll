@@ -71,6 +71,8 @@
     display: flex;
     flex-direction: column;
     align-items: center;
+   background: url(nav.png) no-repeat 50% 0;
+   background-size: contain;
   }
 
   /* Push sentences down so first appears below circle on load */
@@ -100,10 +102,12 @@
   .next-section {
     position: relative;
     z-index: 3;
-    min-height: 100vh;
+    min-height: 150vh;
     display: flex;
     align-items: center;
     justify-content: center;
+    background: url(about-content.png) no-repeat 50% 0;
+    background-size: contain;
   }
 
   .label {
@@ -142,7 +146,6 @@
   </div>
 
   <div class="next-section">
-    <p style="font-size:1.5rem; color:#333;">The rest of your page goes here.</p>
   </div>
 
   <div class="label" id="label">↓ Scroll</div>
