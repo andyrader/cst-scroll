@@ -71,8 +71,8 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-   background: url(nav.png) no-repeat 50% 0;
-   background-size: contain;
+    background: url(nav.png) no-repeat 50% 0;
+    background-size: contain;
   }
 
   /* Push sentences down so first appears below circle on load */
@@ -88,14 +88,14 @@
 
   .sentence {
     text-align: center;
-    font-size: clamp(2rem, 72px, 4.5rem);
+    font-size: clamp(1.875rem, 0.4787rem + 4.4681vw, 4.5rem);
     letter-spacing: -0.025em;
     line-height: 1;
     color: #1C1D1E;
     padding: 0 2rem 10vh;
     width: 100%;
-   font-family: sans-serif;
-   font-weight: bold;
+    font-family: sans-serif;
+    font-weight: bold;
   }
 
   /* ── Next section ── */
@@ -107,7 +107,7 @@
     align-items: center;
     justify-content: center;
     background: url(about-content.png) no-repeat 50% 0;
-    background-size: cover;
+    background-size: contain;
   }
 
   .label {
@@ -118,7 +118,7 @@
     color: #999;
     font-family: sans-serif;
     font-size: 0.7rem;
-    letter-spacing: 0.2em;
+    letter-spacing: 0.05em;
     text-transform: uppercase;
     pointer-events: none;
     transition: opacity 0.4s;
