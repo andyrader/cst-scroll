@@ -216,7 +216,8 @@
     buildNoiseMask(prog, seed);
     bCtx.clearRect(0, 0, W, H);
     bCtx.save();
-    const scale = 1.15 - prog * 0.15;
+    const globalProg = (seed === 0 ? prog1 : prog1 + prog2) / 2;
+    const scale = 1.15 - globalProg * 0.15;
     bCtx.translate(cx, cy); bCtx.scale(scale, scale); bCtx.translate(-cx, -cy);
     bCtx.drawImage(img, 0, 0, W, H);
     bCtx.restore();
