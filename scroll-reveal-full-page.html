@@ -98,6 +98,28 @@
     font-weight: bold;
   }
 
+ .words {
+    position: fixed;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 2;
+    display: flex;
+    flex-direction: column;
+    gap: 1.2rem;
+    pointer-events: none;
+  }
+  
+  .words-left  { right: calc(50% + min(27.5vw, 27.5vh) + 2.5rem); text-align: right; }
+  .words-right { left:  calc(50% + min(27.5vw, 27.5vh) + 2.5rem); text-align: left; }
+  
+  .words span {
+    display: block;
+    font-family: sans-serif;
+    font-size: 12px;
+    font-weight: bold;
+    color: #222;
+  }
+
   /* ── Next section ── */
   .next-section {
     position: relative;
@@ -145,6 +167,13 @@
       </div>
     </div>
   </div>
+ <div class="words words-left" id="wordsLeft">
+    Quality since 1999
+  </div>
+  
+  <div class="words words-right" id="wordsRight">
+    Over $XM donated
+  </div>
 
   <div class="next-section">
   </div>
@@ -159,7 +188,8 @@
   const s2 = document.getElementById('s2');
   const circleStage = document.getElementById('circleStage');
   const hero = document.getElementById('hero');
-
+  const wordsLeft  = document.getElementById('wordsLeft');
+  const wordsRight = document.getElementById('wordsRight');
   let W, H, cx, cy;
   let prog1 = 0, prog2 = 0;
 
@@ -250,6 +280,8 @@
     const fadeProgress = Math.min(Math.max((vh - heroBottom) / (vh * 0.4), 0), 1);
     circleStage.style.opacity = 1 - fadeProgress;
     circleStage.style.filter  = `blur(${fadeProgress * 14}px)`;
+    wordsLeft.style.opacity    = 1 - fadeProgress;
+    wordsRight.style.opacity   = 1 - fadeProgress;
   }
 
   window.addEventListener('scroll', onScroll, { passive: true });
