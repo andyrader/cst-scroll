@@ -211,13 +211,11 @@
     mCtx.putImageData(imageData, 0, 0);
   }
 
-  function drawBlob(prog, img, seed) {
+  function drawBlob(prog, img, seed, scale) {
     if (prog <= 0 || !img.complete || !img.naturalWidth) return;
     buildNoiseMask(prog, seed);
     bCtx.clearRect(0, 0, W, H);
     bCtx.save();
-    const globalProg = (seed === 0 ? prog1 : prog1 + prog2) / 2;
-    const scale = 1.15 - globalProg * 0.15;
     bCtx.translate(cx, cy); bCtx.scale(scale, scale); bCtx.translate(-cx, -cy);
     bCtx.drawImage(img, 0, 0, W, H);
     bCtx.restore();
@@ -228,9 +226,10 @@
   }
 
   function render() {
+    const globalScale = 1.15 - ((prog1 + prog2) / 2) * 0.15;
     ctx.clearRect(0, 0, W, H);
-    drawBlob(prog1, img1, 0);
-    drawBlob(prog2, img2, 99);
+    drawBlob(prog1, img1, 0,  globalScale);
+    drawBlob(prog2, img2, 99, globalScale);
     requestAnimationFrame(render);
   }
 
